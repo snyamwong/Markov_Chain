@@ -6,8 +6,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+/**
+ * A heap of MESS
+ * @author wongt1
+ *
+ */
 public class Markov_Chain {
 
+	/**
+	 * Main
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException{
 		// TODO Auto-generated method stub
 		start();
@@ -41,6 +51,7 @@ public class Markov_Chain {
 	private static void construct(Scanner scanner, TreeMap<String, TreeMap<String, Integer>> freqTable, String firstWord, String secondWord) throws IOException{
 		String thirdWord = "";
 		if(scanner.hasNext()) { thirdWord = cleanUpString(scanner.next()); }
+		//End of file, base case
 		else { return; }
 		String biString =  firstWord + " " + secondWord;
 		
@@ -51,7 +62,7 @@ public class Markov_Chain {
 			nextWord = new TreeMap<>();
 			nextWord.put(thirdWord, 1);
 		}
-		//Use the TreeMap of the biString
+		//Use the TreeMap of the existing biString
 		else{
 			nextWord = freqTable.get(biString);
 			if(freqTable.get(biString).get(thirdWord) != null) {
@@ -62,34 +73,50 @@ public class Markov_Chain {
 			}
 		}
 		
+		//puts the biString and the frequency of the next word into the frequency table
 		freqTable.put(biString, nextWord);
 		
+		//Runs this method until end of file
 		construct(scanner, freqTable, secondWord, thirdWord);
 	}
 
+	/**
+	 * Generate the random 50 words
+	 * @param freqTable
+	 */
 	private static void generate(TreeMap<String, TreeMap<String, Integer>> freqTable){
 		//All this to get a random biGram
 		int random = (new Random()).nextInt(freqTable.size());
 		ArrayList<String> list = new ArrayList<String>();
 		Iterator<String> iterator = freqTable.keySet().iterator();
+		//Adds all the first possible biGram into an ArrayList, O(freqTable.size)
 		while(iterator.hasNext()){
 			list.add(iterator.next());
 		}
 		String firstBiGram = list.get(random);
 		System.out.print(firstBiGram + " ");
 		list.clear();
+		
+		//Generate the next word, up to 50 (change if needed)
 		for(int i = 2; i <= 50; i++){
 			TreeMap<String, Integer> thirdWord = freqTable.get(firstBiGram);
+			//There is no third word following the biGram, which exits the program automatically
 			if(thirdWord == null){
 				System.out.println();
 				return;
 			}
-			random = (new Random()).nextInt(thirdWord.size());
+			
 			
 			iterator = thirdWord.keySet().iterator();
 			while(iterator.hasNext()){
-				list.add(iterator.next());
+				String word = iterator.next();
+				//Loop to add the words based on it's frequency
+				for(int j = 0; j < thirdWord.get(word); j++){
+					list.add(word);
+				}
+				
 			}
+			random = (new Random()).nextInt(list.size());
 			
 			//Third Word
 			String firstWord = firstBiGram.split(" ")[1];
